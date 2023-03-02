@@ -1,0 +1,14 @@
+
+
+SELECT t.host_name, mv.entity_name, t.target_name, t.target_type, mv.unit, mv.avg_value, mv.collection_time, mv.KEY_PART_2 PDB_Service, mv.KEY_PART_1
+FROM sysman.gc$metric_values_daily mv JOIN sysman.em_targets t
+ON (t.target_name =mv.entity_name) join SYSMAN.MGMT$OS_HW_SUMMARY s on (t.host_name=s.target_name)
+WHERE
+   t.target_name =mv.entity_name
+   AND mv.metric_column_name = 'cpuUtil'
+   AND trunc(mv.collection_time) > trunc(sysdate-3)
+   AND t.target_type='oracle_pdb'
+   AND upper(mv.entity_name) like '%<PDB Name>%' AND
+   NOT REGEXP_LIKE(mv.KEY_PART_2, 'GG|SYS')
+-- AND mv.avg_value/8 >= 1
+   ORDER BY mv.collection_time,mv.KEY_PART_2;
